@@ -34,31 +34,32 @@ HaffmanTree::~HaffmanTree()
 			ptr->lt = ptr->rt = ptr->next = nullptr;
 			delete ptr;
 		} while (!nodes.empty());
-
+		root = nullptr;
 	}
-	root = nullptr;
 }
-
-bool HaffmanTree::code(char* input_name, char* output_name)
+// функция кодирования файла input_name в файл output_name
+bool HaffmanTree::code(std::string input_name, std::string output_name)
 {
 	std::ifstream in(input_name);
 	char a;
-	in >> a;
-	// поверяем, что файл не пуст и что в дереве нет другого кодирования
+	in.get(a);
+	// поверяем, что входной файл не пуст и что в дереве нет другого кодирования
 	if (root || in.eof())
 	{
 		in.close();
 		return false;
 	}
 	in.close();
-
+	// дерево пустое, значит надо его построить
 	create_tree(input_name);
-	
+	// построили дерево, начинаем кодировать символы
 	std::ofstream out(output_name);
 	in.open(input_name);
+	in.get(a);
 	Node* node = nullptr;
 	do
 	{
+		// идем по дереву до листьев, поворачивая налево ставим 0, поворачивая направо ставим 1
 		node = root;
 		while (node->lt)
 		{
@@ -74,26 +75,36 @@ bool HaffmanTree::code(char* input_name, char* output_name)
 			}
 		}
 
-
-		in >> a;
+		// кодируем, пока не закончится файл
+		in.get(a);
 	} while (!in.eof());
 	in.close();
 	out.close();
 	return true;
 }
-
-void HaffmanTree::create_tree(char* file_name)
+// функция создания дерева из заданного файла
+void HaffmanTree::create_tree(std::string file_name)
 {
+	// таблица количества определенных символов в тексте
 	int tab[256] = { 0 };
-
+	// функция, заполняющая таблицу
 	count_chars(file_name, tab);
+	// функция, создающая первоначальный упорядоченный список вершин
 	create_list(tab);
+	// проверяем сиутацию когда в тексте встречается один и тот же символ
+	if (!root->next)
+	{
+		// добавляем пустую вершину, которая позволит построить дерево, т.к. необходимо минимум 2 вершины
+		Node* ptr = root;
+		root = new Node(256);
+		root->next = ptr;
+	}
 
 	// объединяем вершины, пока не останется 1 единственная
 	while (root->next)
 	{
 		// первая и вторая наименьшие вершины
-		Node* node1 = root, *node2 = root->next;
+		Node* node1 = root, * node2 = root->next;
 
 		Node* newNode = new Node(256);
 		newNode->vec = node1->vec | node2->vec;
@@ -105,7 +116,7 @@ void HaffmanTree::create_tree(char* file_name)
 		// ищем место для новой вершины
 		Node** tmp = &(node2->next);
 
-		while (*tmp && newNode->weight >(*tmp)->weight)
+		while (*tmp && newNode->weight > (*tmp)->weight)
 		{
 			tmp = &((*tmp)->next);
 		}
@@ -115,23 +126,24 @@ void HaffmanTree::create_tree(char* file_name)
 		root = node2->next;
 		node2->next = nullptr;
 	}
-}
 
-void HaffmanTree::count_chars(char* file_name, int* tab)
+}
+// считаем количество символо в файле, записываем в таблицу результаты
+void HaffmanTree::count_chars(std::string file_name, int* tab)
 {
 	std::ifstream in(file_name);
 
 	char a;
 	while (!in.eof())
 	{
-		in >> a;
+		in.get(a);
 		tab[a]++;
 	}
 	tab[a]--;
 
 	in.close();
 }
-
+// создается упорядоченый по возрастанию список для начала создания дерева
 void HaffmanTree::create_list(int* tab)
 {
 	Node* node = nullptr;
@@ -140,13 +152,14 @@ void HaffmanTree::create_list(int* tab)
 	{
 		if (tab[i])
 		{
+			// для каждого символа из текста создается вершина с весом и определяется ее место
 			node = new Node(256);
 			node->weight = tab[i];
 			node->vec[i] = 1;
 
 			Node** tmp = &root;
 
-			while (*tmp && node->weight >(*tmp)->weight)
+			while (*tmp && node->weight > (*tmp)->weight)
 			{
 				tmp = &((*tmp)->next);
 			}
@@ -155,15 +168,18 @@ void HaffmanTree::create_list(int* tab)
 		}
 	}
 }
-
-bool HaffmanTree::decode(char* input_name, char* output_name)
+// функция преобразования закодированного текста в раскодированный
+bool HaffmanTree::decode(std::string input_name, std::string output_name)
 {
+	// проверяем наличие дерева
+	if (!root)
+		return false;
 	std::ifstream in(input_name);
 	std::ofstream out(output_name);
 
-	// проверяем файл на пустоту, декодим пока файл не хакончился
+	// проверяем файл на пустоту, декодим пока файл не закончился
 	char a;
-	in >> a;
+	in.get(a);
 	while (!in.eof())
 	{
 		// идем каждый раз с корня
@@ -171,18 +187,14 @@ bool HaffmanTree::decode(char* input_name, char* output_name)
 
 		do
 		{
-			// есил 1, то идем вправо, иначе влево
+			// если 1, то идем вправо, иначе влево
 			if (a == 49)
 				node = node->rt;
 			else
 				node = node->lt;
-			in >> a;
+			in.get(a);
 			// т.к. у каждой вершины обязательно есть оба поддерева, то проверяем только 1 из них
 		} while (node->lt);
-
-		// если файл закончился, выходим из функции
-		if (in.eof())
-			return true;
 
 		// выводим найденный символ
 		for (int i = 0; i < 256; i++)
@@ -192,7 +204,10 @@ bool HaffmanTree::decode(char* input_name, char* output_name)
 				// чтобы лишние разы не ходить, т.к. выводим только 1 символ
 				i = 256;
 			}
-		out << "  " << node->weight << '\n';
+
+		// если файл закончился, выходим из функции
+		if (in.eof())
+			return true;
 	}
 	return false;
 }

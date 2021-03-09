@@ -23,7 +23,7 @@
     <ProjectGuid>{44FF685F-6507-4053-9A88-32FAAB1BB696}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>haffman</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,12 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BBV.h" />
     <ClInclude Include="haffman_tree.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ConsoleApplication1\ConsoleApplication1\BBV.cpp" />
+    <ClCompile Include="BBV.cpp" />
     <ClCompile Include="haffman.cpp" />
     <ClCompile Include="haffman_tree.cpp" />
     <ClCompile Include="stdafx.cpp">

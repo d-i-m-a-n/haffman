@@ -1,6 +1,7 @@
 #pragma once
-#include "C:\Users\Asus\source\repos\ConsoleApplication1\ConsoleApplication1\BBV.h"
+#include "BBV.h"
 #include <fstream>
+#include <string>
 
 class HaffmanTree
 {
@@ -9,17 +10,17 @@ public:
 
 	~HaffmanTree();
 
-	bool code(char* input_name, char* output_name);
+	bool code(std::string input_name, std::string output_name);
 
-	bool decode(char* input_name, char* output_name);
+	bool decode(std::string input_name, std::string output_name);
 
 	void clear_tree();
 
 private:
 
-	void create_tree(char* file_name);
+	void create_tree(std::string file_name);
 
-	void count_chars(char* file_name, int* tab);
+	void count_chars(std::string file_name, int* tab);
 
 	void create_list(int* tab);
 
